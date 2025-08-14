@@ -28,13 +28,13 @@ zwaveManufacturer:
     manufacturerId: 0x0086
     productType: 0x0002
     productId: 0x0009
-    deviceProfileName: base-electric-meter
+    deviceProfileName: aeon-multi-clamp-meter
   - id: "AeonHomeEnergyMeter/2"
     deviceLabel: Aeon Energy Monitor
     manufacturerId: 0x0086
     productType: 0x0002
     productId: 0x0001
-    deviceProfileName: base-electric-meter
+    deviceProfileName: aeon-multi-clamp-meter
 zwaveGeneric:
   - id: "GenericEnergyMeter"
     deviceLabel: Energy Monitor
