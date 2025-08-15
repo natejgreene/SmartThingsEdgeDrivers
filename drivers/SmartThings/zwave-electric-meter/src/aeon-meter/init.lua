@@ -342,7 +342,11 @@ local aeon_meter = {
       default = DEFAULT_POLLING_INTERVAL,
       required = false
     }
-  }
+  },
+  
+  -- Expose these handlers to the parent driver
+  update_polling = update_polling,
+  configuration_handler = configure_handler
 }
 
 return aeon_meter

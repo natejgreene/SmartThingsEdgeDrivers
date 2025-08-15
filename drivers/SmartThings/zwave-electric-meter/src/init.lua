@@ -73,6 +73,38 @@ local function merge_subdriver_preferences(driver)
     driver.preferences = all_preferences
   end
 end
+
+-- Register device lifecycle handlers from each subdriver with the main driver
+local function register_subdriver_handlers(driver, device)
+  -- Find the matching subdriver for this device
+  local matching_subdriver = nil
+  
+  for _, subdriver in ipairs(driver.sub_drivers) do
+    if subdriver.can_handle and subdriver:can_handle({}, driver, device) then
+      matching_subdriver = subdriver
+      break
+    end
+  end
+  
+  if matching_subdriver then
+    print("Found matching subdriver: " .. (matching_subdriver.NAME or "unnamed"))
+    
+    -- Register each needed handler
+    if matching_subdriver.update_polling then
+      print("Registering polling handler")
+      device:set_field("update_polling_handler", matching_subdriver.update_polling)
+    end
+    
+    if matching_subdriver.configuration_handler then
+      print("Registering configuration handler")
+      device:set_field("configure_handler", matching_subdriver.configuration_handler)
+    end
+    
+    return true
+  end
+  
+  return false
+end
   for _, subdriver_module in ipairs(driver.sub_drivers) do
     local subdriver = require(subdriver_module)
     if subdriver.preferences then
@@ -131,32 +163,20 @@ end
 local device_init = function(self, device)
   print("Device initialized: " .. device.id)
   
-  -- Try to find the appropriate subdriver for this device
-  local subdriver = nil
-  for _, sub in ipairs(self.sub_drivers) do
-    if sub.can_handle and sub:can_handle({}, self, device) then
-      subdriver = sub
-      break
-    end
-  end
-  
-  -- If we found a matching subdriver, store its preferences
-  if subdriver then
-    print("Found matching subdriver: " .. (subdriver.NAME or "unnamed"))
+  -- Register handlers for this device from its matching subdriver
+  if register_subdriver_handlers(self, device) then
+    print("Successfully registered subdriver handlers")
     
-    -- Save subdriver-specific handlers and preferences
-    if subdriver.preferences then
-      print("Setting device-specific preferences from subdriver")
-      device:set_field("subdriver_preferences", subdriver.preferences)
+    -- Ensure polling is properly configured if needed
+    local update_polling = device:get_field("update_polling_handler")
+    if update_polling then
+      print("Setting up initial polling")
+      device.thread:call_with_delay(5, function() 
+        update_polling(self, device)
+      end)
     end
-    
-    if subdriver.update_polling then
-      device:set_field("update_polling_handler", subdriver.update_polling)
-    end
-    
-    if subdriver.configuration_handler then
-      device:set_field("configure_handler", subdriver.configuration_handler)
-    end
+  else
+    print("No matching subdriver found for this device")
   end
 end
 
