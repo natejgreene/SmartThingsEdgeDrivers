@@ -1,0 +1,30 @@
+name: aeon-multi-clamp-meter
+components:
+- id: main
+  capabilities:
+  - id: powerMeter
+    version: 1
+  - id: energyMeter
+    version: 1
+  - id: refresh
+    version: 1
+  - id: configuration
+    version: 1
+  categories:
+  - name: CurbPowerMeter
+- id: clamp1
+  capabilities:
+  - id: powerMeter
+    version: 1
+  - id: energyMeter
+    version: 1
+  categories:
+  - name: CurbPowerMeter
+- id: clamp2
+  capabilities:
+  - id: powerMeter
+    version: 1
+  - id: energyMeter
+    version: 1
+  categories:
+  - name: CurbPowerMeter
